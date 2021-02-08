@@ -16,15 +16,15 @@
 
 // Implementation: the ALU logic manipulates the x and y inputs
 // and operates on the resulting values, as follows:
-// if (zx == 1) set x = 0        // 16-bit constant
-// if (nx == 1) set x = !x       // bitwise not
-// if (zy == 1) set y = 0        // 16-bit constant
-// if (ny == 1) set y = !y       // bitwise not
-// if (f == 1)  set out = x + y  // integer 2's complement addition
-// if (f == 0)  set out = x & y  // bitwise and
-// if (no == 1) set out = !out   // bitwise not
+// if (zx  == 1) set x = 0        // 16-bit constant
+// if (nx  == 1) set x = !x       // bitwise not
+// if (zy  == 1) set y = 0        // 16-bit constant
+// if (ny  == 1) set y = !y       // bitwise not
+// if (f   == 1) set out = x + y  // integer 2's complement addition
+// if (f   == 0) set out = x & y  // bitwise and
+// if (no  == 1) set out = !out   // bitwise not
 // if (out == 0) set zr = 1
-// if (out < 0) set ng = 1
+// if (out <  0) set ng = 1
 
 CHIP ALU {
     IN  
@@ -41,6 +41,34 @@ CHIP ALU {
         zr, // 1 if (out == 0), 0 otherwise
         ng; // 1 if (out < 0),  0 otherwise
 
-    PARTS:
-   // Put you code here:
+   PARTS:
+   Mux16(a=x,b[0..15]=false,sel=zx,out=zdx);//Zero the x
+   Not16(in=zdx,out=notx);                  //Not the x
+   Mux16(a=zdx,b=notx,sel=nx,out=ndx);      //chose x or notx
+
+   // ditto for y
+   Mux16(a=y,b[0..15]=false,sel=zy,out=zdy);
+   Not16(in=zdy,out=noty);
+   Mux16(a=zdy,b=noty,sel=ny,out=ndy);
+   
+   // Compute
+   Add16(a=ndx, b=ndy, out=fadd);
+   And16(a=ndx, b=ndy, out=fand);
+
+   // Select output
+   Mux16(a=fand, b=fadd, sel=f, out=out1);
+   Not16(in=out1, out=notout1);
+   //Mux16(a=out1, b=notout1, sel=no, out=out);
+
+
+   Mux16 (a=out1, b=notout1, sel=no, out[0..7]=tempoutzrfst, out[8..15]=tempoutzrsec, out[15]=tempoutng, out=out);
+
+   //zr
+   Or8Way(in=tempoutzrfst, out=outfst);
+   Or8Way(in=tempoutzrsec, out=outsec);
+   Or(a=outfst, b=outsec, out=notzr);
+   Not(in=notzr, out=zr);
+
+   //ng
+   FullAdder(a=tempoutng, b=true, sum=overflow, carry=ng);
 }
