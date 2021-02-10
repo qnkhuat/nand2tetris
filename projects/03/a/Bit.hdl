@@ -14,5 +14,9 @@ CHIP Bit {
     OUT out;
 
     PARTS:
-    // Put your code here:
+
+	// Order doesnt matter
+	// Check this for tips http://nand2tetris-questions-and-answers-forum.32033.n3.nabble.com/Hardware-Construction-Survival-Kit-td3385741.html
+	Mux(a=t1, b=in, sel=load, out=w1);
+    DFF(in=w1, out=out, out=t1);
 }
