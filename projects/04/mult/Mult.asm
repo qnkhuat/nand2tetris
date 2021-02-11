@@ -10,3 +10,29 @@
 // R0 >= 0, R1 >= 0, and R0*R1 < 32768.
 
 // Put your code here.
+
+@count
+M=0
+@2 // Init product = 0
+M=0
+(LOOP)
+	@count
+	D=M // D=count
+	@1
+	D=D-M // D = count - R1
+	@END
+	D;JGE // If ( count > R1 ) goto END
+
+	@0
+	D=M
+	@2
+	M = D + M // Mul = multiple sum
+
+	@count // Inc count
+	M=M+1 
+	@LOOP // Jump to LOOP
+	0;JMP
+(END)
+	@END
+	0;JMP
+	
