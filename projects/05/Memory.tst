@@ -125,15 +125,15 @@ set in 0, set load 1, set address %X4000, tick, output; tock, output;
 // Keyboard test
 
 set address 24576,
-echo "Click the Keyboard icon and hold down the 'K' key (uppercase) until you see the next message (it should appear shortly after that) ...",
-// It's important to keep holding the key down since if the system is busy,
-// the memory will zero itself before being outputted.
-
-while out <> 75 {
-    tick, tock,     // tick, tock prevents hang if sync. parts used in KB path.
-}
-
-clear-echo,
+//echo "Click the Keyboard icon and hold down the 'K' key (uppercase) until you see the next message (it should appear shortly after that) ...",
+//// It's important to keep holding the key down since if the system is busy,
+//// the memory will zero itself before being outputted.
+//
+//while out <> 75 {
+//    tick, tock,     // tick, tock prevents hang if sync. parts used in KB path.
+//}
+//
+//clear-echo,
 output;
 
 // Screen test

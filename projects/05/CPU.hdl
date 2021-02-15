@@ -39,5 +39,53 @@ CHIP CPU {
         pc[15];          // address of next instruction
 
     PARTS:
-    // Put your code here:
+
+	// A-instruction -> data
+	// C-instruction -> operands
+	DMux(in=true, sel=instruction[15], a=isinstA, b=isinstC);
+
+	// if the instruction instructio to store A
+	And(a=isinstC, b=instruction[5], out=storeAfromOut); 
+	Or(a=storeAfromOut, b=isinstA, out=storeA);
+
+	Mux16(a=instruction, b=aluout, sel=storeAfromOut, out=ain);
+	ARegister(in=ain, load=storeA, out=aout, out[0..14]=addressM);
+	
+	// whether to get memory from ARegister or inM
+	Mux16(a=aout, b=inM, sel=instruction[12], out=amdata);
+	ALU(x=outD, y=amdata,
+		zx=instruction[11],
+		nx=instruction[10],
+		zy=instruction[9],
+		ny=instruction[8],
+		f =instruction[7],
+		no=instruction[6],
+		out=aluout, zr=zr, ng=ng);
+
+
+	And(a=isinstC, b=instruction[4], out=storeD);
+	DRegister(in=aluout, load=storeD, out=outD);
+	
+	And(a=isinstC, b=instruction[3], out=writeM, out=storeM);
+	Mux16(a[0]=false, b=aluout, sel=storeM, out=outM);
+
+	
+	// jump condition
+	Not(in=ng,out=pos);
+	Not(in=zr,out=nzr);
+	And(a=isinstC,b=instruction[0],out=jgt);
+	And(a=pos,b=nzr,out=posnzr);
+	And(a=jgt,b=posnzr,out=ld1);
+
+	And(a=isinstC,b=instruction[1],out=jeq);
+	And(a=jeq,b=zr,out=ld2);
+
+	And(a=isinstC,b=instruction[2],out=jlt);
+	And(a=jlt,b=ng,out=ld3);
+
+	Or(a=ld1,b=ld2,out=ldt);
+	Or(a=ld3,b=ldt,out=ld);
+
+	PC(in=aout, load=ld, inc=true, reset=reset, out[0..14]=pc);
+
 }
