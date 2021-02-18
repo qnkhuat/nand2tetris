@@ -20,6 +20,7 @@ class Parser():
 		self.icommand += 1
 		if self.command.strip().startswith('//') or len(self.command) == 0:
 			self.advance()
+			return
 		if "//" in self.command:
 			self.command = self.command[:self.command.index('//')].strip()
 
@@ -140,10 +141,9 @@ class Assembler():
 				binaries.append(self.c.gen_c(self.p.dest(), self.p.comp(), self.p.jump()))
 		return binaries
 
-	def write(self, path, binaries):
+	def write(self, path, lines):
 		with open(path, "w") as f:
-			f.writelines([f"{line}\n" for line in binaries])
-		print(f"Wrote to {path}")
+			f.writelines([f"{line}\n" for line in lines])
 
 
 
@@ -155,5 +155,6 @@ if __name__ == "__main__":
 	a.buildSymbolTable()
 	binary = a.generate()
 	a.write(filename.replace(".asm", ".hack"), binary)
+	print(f"Wrote to {path}")
 
 
