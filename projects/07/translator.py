@@ -120,6 +120,11 @@ class Translator():
 		self.add("A=M-1")
 		self.add("D=M")
 
+	def _pushd(self, addr="@SP"):
+		self.add(addr)
+		self.add("A=M")
+		self.add("M=D")
+
 	def _compare(self, op):
 		self.gen_a("sub")
 		self.add("@SP")
@@ -185,9 +190,7 @@ class Translator():
 			if segment == "constant":
 				self.add(f"@{index}")
 				self.add("D=A")
-				self.add("@SP")
-				self.add("A=M")
-				self.add("M=D")
+				self._pushd()
 				self._inc_sp()
 			elif segment == "pointer":
 				if int(index) == 0:
@@ -195,9 +198,7 @@ class Translator():
 				elif int(index) == 1:
 					self.add("@THAT")
 				self.add("D=M")
-				self.add("@SP")
-				self.add("A=M")
-				self.add("M=D")
+				self._pushd()
 				self._inc_sp()
 			else:
 				# get the value of segment and store it to R5
@@ -221,23 +222,18 @@ class Translator():
 					self.add("D=A")
 				else: raise ValueError("Operation not supported") 
 				self.add(f"@{index}")
-				self.add("D=D+A") 
-				self.add("A=D")
+				self.add("A=D+A") 
 				self.add("D=M") # value of segment now is in D
 
 				# store it in stack
-				self.add(f"@SP")
-				self.add("A=M")
-				self.add("M=D")
+				self._pushd()
 				self._inc_sp()
 
 		elif command == 'pop':
 			# get address to store value
 			if segment == "pointer":
 				self._dec_sp()
-				self.add("@SP")
-				self.add("A=M")
-				self.add("D=M")
+				self._pushd()
 				if int(index) == 0:
 					self.add("@THIS")
 				elif int(index) == 1:
@@ -269,15 +265,14 @@ class Translator():
 				else: raise ValueError("Operation not supported") 
 				self.add(f"@{index}")
 				self.add("D=D+A")
+				# store the address to a temp
 				self.add("@R6")
-				self.add("M=D") # store the address here
+				self.add("M=D")
 
 				# fill value into address
 				self.add("@R5") # get value
 				self.add("D=M")
-				self.add("@R6") # store value to address
-				self.add("A=M")
-				self.add("M=D")
+				self._pushd("@R6")
 				self._dec_sp()
 
 		else:
@@ -291,7 +286,8 @@ class Translator():
 		self.p.reset()
 		while self.p.hasMoreCommands():
 			self.p.advance()
-			print(f"Command: {self.p.command}, Type: {self.p.commandType()}, arg1: {self.p.arg1()}, arg2: {self.p.arg2()}, arg3: {self.p.arg3()}")
+			if self.verbose:
+				print(f"Command: {self.p.command}, Type: {self.p.commandType()}, arg1: {self.p.arg1()}, arg2: {self.p.arg2()}, arg3: {self.p.arg3()}")
 			self.add_c(self.p.command)
 			if self.p.commandType() == CT.C_ARITHMETIC:
 				self.gen_a(self.p.arg1())
@@ -309,7 +305,7 @@ if __name__ == "__main__":
 	filename = sys.argv[1]
 	outfile = filename.replace(".vm", ".asm")
 	print(f"Parsing file {filename}")
-	t = Translator(filename, verbose=True)
+	t = Translator(filename, verbose=False)
 	t.gen()
 	t.write(outfile)
 	print(f"Wrote to {outfile}")
