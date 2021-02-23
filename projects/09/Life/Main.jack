@@ -1,0 +1,9 @@
+class Main {
+    function void main() {
+		var Life life;
+		let life = Life.new();
+		do life.run();
+		do life.dispose();
+        return;
+    }
+}

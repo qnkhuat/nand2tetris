@@ -1,0 +1,237 @@
+class Life {
+
+	field int cx, cy, size;
+	field int width, height;
+	field int numcols, numrows;
+	field Array world;
+
+
+	constructor Life new() {
+		let cx = 0;
+		let cy = 0;
+		let size = 16;
+		let width = 512;
+		let height = 256;
+		let numrows = height / size;
+		let numcols = width / size;
+		do drawCursor(cx, cy, true);
+
+		// Construct the world here
+		do init_world();
+		do display();
+		
+
+		return this;
+	}
+
+	method void step(){
+		// Create a duplication of current world
+		var int irow, icol, count;
+		var Array tempWorld, atemp, aworld, row1, row2, row3, row;
+
+		let tempWorld = Array.new(numrows);
+		let irow= 0;
+		while(irow < numrows){
+			let atemp = Array.new(numcols);
+			let tempWorld[irow] = atemp;
+			let aworld = world[irow];
+			let icol = 0;
+			while(icol < numcols){
+				let atemp[icol] = aworld[icol];
+				let icol = icol + 1;
+			}
+			let irow = irow + 1;
+		}
+
+	  /*
+	   * 1. Any live cell with fewer than two live neighbours dies, as if by underpopulation.
+	   * 2. Any live cell with two or three live neighbours lives on to the next generation.
+	   * 3. Any live cell with more than three live neighbours dies, as if by overpopulation.
+	   * 4. Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
+	   */
+		// Update
+		let irow = 1;
+		while(irow < (numrows - 1)){
+			let row1 = tempWorld[irow-1];
+			let row2 = tempWorld[irow];
+			let row3 = tempWorld[irow+1];
+			let row = world[irow];
+			let icol = 1;
+			while(icol < (numcols - 1)){
+				let count = row1[icol-1] + row1[icol] + row1[icol+1] + row2[icol-1]  + row2[icol+1] + row3[icol-1] + row3[icol] + row3[icol+1];
+				if ( count < 2 ){
+					let row[icol] = 0;
+				} 
+				if (count = 3){
+					let row[icol] = 1;
+				} 
+				if (count > 3){
+					let row[icol] = 0;
+				}
+				let icol = icol + 1;
+			}
+			let irow = irow + 1;
+		}
+
+		let irow = 1;
+		while(irow < (numrows - 1)){
+			let row = tempWorld[irow-1];
+			do row.dispose();
+			let irow = irow + 1;
+		}
+		do tempWorld.dispose();
+		return;
+	}
+
+	method void init_world(){
+		var int count, i;
+		var Array a;
+		let world = Array.new(numrows);
+		let count = 0;
+		while(count < numrows){
+			let a = Array.new(numcols);
+			let world[count] = a;
+			let i = 0;
+			while(i < numcols){
+				let a[i] = 0;
+				let i = i + 1;
+			}
+
+			let count = count + 1;
+		}
+		return;
+	}
+
+	method void display(){
+		var int irow, icol;
+		var Array row;
+		let irow = 0;
+		while (irow < numrows){
+			let row = world[irow];
+			let icol = 0;
+			while(icol < numcols){
+				if (row[icol] = 1){
+					do drawCursor((icol*size), (irow*size), true);
+				} else{
+					do drawCursor((icol*size), (irow*size), false);
+				}
+				let icol = icol + 1;
+			}
+			let irow = irow + 1;
+		}
+		do drawCursor(cx, cy, true);
+		return;
+	}
+
+
+	method void dispose() {
+		do Memory.deAlloc(this);
+		return;
+	}
+
+	method void markCell(){
+		var int x, y;
+		var int irow, icol;
+		var Array row;
+		let x = cx / size;
+		let y = cy / size;
+		let irow = 0;
+		while (irow < numrows){
+			let row = world[irow];
+			let icol = 0;
+			while(icol < numcols){
+				if ((x = icol) & (y = irow)){
+					let row[icol] = 1 - row[icol];
+				}
+				let icol = icol + 1;
+			}
+			let irow = irow + 1;
+		}
+		return;
+	}
+
+	/* Life */ 
+
+	/* UI */
+	method void drawCursor(int x, int y, boolean color){
+		do Screen.setColor(color);
+		do Screen.drawRectangle(x, y, x + size - 1, y + size - 1);
+		return; 
+	}
+
+	method void moveCursor(int direction){
+		var Array row;
+		let row = world[(cy/size)];
+		if (row[(cx/size)] = 0){
+			do drawCursor(cx, cy, false); // Remove current cursor
+		}
+		if (direction = 1) { // up
+			if(cy > size){
+				let cy = cy - size;
+			}else{
+				let cy = 0;
+			}
+		}
+		if (direction = 4){ // right
+			if(cx < (width - size) ){
+				let cx = cx + size;
+			}else{
+				let cx = width - size;
+			}
+		}
+		if (direction = 2){ // down
+			if(cy < (height - size)){
+				let cy = cy + size;
+			}else{
+				let cy = height - size;
+			}
+		}
+		if (direction = 3){ // left
+			if(cx > size){
+				let cx = cx - size;
+			}else{
+				let cx = 0;
+			}
+		}
+		do drawCursor(cx, cy, true); // draw new curosr
+		return;
+	}
+
+	method void run() {
+		var char key;  // the key currently pressed by the user
+		var boolean exit;
+		var boolean mark;
+		var int direction;
+		let exit = false;
+
+		while (~exit) {
+			// waits for a key to be pressed
+			while (key = 0) {
+				let direction = 0;
+				let mark = false;
+				let key = Keyboard.keyPressed();
+			}
+			if (key = 81)  { let exit = true; } // q key
+			if (key = 78)  { do step(); } // n key
+			if (key = 32)  { let mark = true; } // space key
+			
+			if ((key = 131) | (key = 75)) { let direction = 1; } // up arrow
+			if ((key = 133) | (key = 74)) { let direction = 2; } // down arrow
+			if ((key = 130) | (key = 72)) { let direction = 3; } // left arrow
+			if ((key = 132) | (key = 76)) { let direction = 4; } // right arrow
+
+			// waits for the key to be released
+			while (~(key = 0)) {
+				let key = Keyboard.keyPressed();
+			}
+			if (mark){
+				do markCell();
+			}
+			do display();
+			do moveCursor(direction);
+		} // while
+		return;
+	}
+
+}
+

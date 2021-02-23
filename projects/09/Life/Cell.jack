@@ -1,0 +1,25 @@
+class Cell {
+	field int x, y;
+	field boolean alive;
+
+
+	constructor Cell new(int Cx, int Cy, boolean Calive) {
+		let x = Cx;
+		let y = Cy;
+		let alive = Calive;
+		do draw();
+		return this;
+	}
+
+
+	method void draw(){
+		if(alive){
+      		do Screen.setColor(true);
+		}else{
+			do Screen.setColor(false);
+		}	
+      	do Screen.drawRectangle(x, y, x + 4, y + 4);
+      	return;
+	}
+
+}
