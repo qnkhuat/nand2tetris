@@ -424,7 +424,7 @@ class Translator():
 			f.writelines([f"{line}\n" for line in self.asms])
 
 if __name__ == "__main__":
-	verbose = True
+	verbose = False
 	path = sys.argv[1]
 	if os.path.isdir(path):
 		print(f"Translate dir {path}")
