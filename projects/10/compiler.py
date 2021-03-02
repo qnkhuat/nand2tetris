@@ -187,7 +187,6 @@ def expect_assert(expect, got):
 		assert got == expect, f"Expect: {expect}. Got: {got}"
 
 def append_node(root, child):
-	#print("Append node: ", ET.tostring(child, short_empty_elements=False).decode('utf-8'))
 	return root.append(child)
 	
 class CompilationEngine:
@@ -202,19 +201,13 @@ class CompilationEngine:
 		self._constatns = ['true', 'false', 'null', 'this']
 	
 	def new_node(self, key, value="\n"):
-		#node = etree.Element(key)
 		node = ET.Element(key)
-		#if value == None:
 		node.tail = "\n"
 		node.text = value 
-		#print("New node: ", etree.tostring(node, pretty_print=True, encoding='utf-8').decode('utf-8'))
 		return node
 
 	def compileClass(self):
-		# class ClassName {classVarDec* subroutineDec*}
-		# call compileVarDec
-		# call compileSubroutine
-		root = self.new_node('class')
+				root = self.new_node('class')
 		append_node(root, self.new_node(self.t.tokenType().value, self.t.token())) # class
 
 		self.t.advance() # eat class_name
@@ -233,9 +226,7 @@ class CompilationEngine:
 				append_node(root, self.compileClassVarDec())
 			elif self.t.token() in self._subroutine_types:
 				append_node(root, self.compileSubroutine())
-			#else:
-				#raise ValueError(expect_assert("Var or Subroutine declaration", self.t.token()))
-
+			
 		expect_assert('}', self.t.token())
 		append_node(root, self.new_node(self.t.tokenType().value, self.t.token())) # }
 		return root
@@ -246,7 +237,6 @@ class CompilationEngine:
 		append_node(root, self.new_node(self.t.tokenType().value, self.t.token()))
 
 		self.t.advance() # type
-		#expect_assert(self._types, self.t.token())
 		append_node(root, self.new_node(self.t.tokenType().value, self.t.token()))
 
 		while True:
@@ -271,7 +261,6 @@ class CompilationEngine:
 		append_node(root, self.new_node(self.t.tokenType().value, self.t.token())) # routine type
 
 		self.t.advance() # return type
-		#expect_assert(self._types, self.t.token())
 		append_node(root, self.new_node(self.t.tokenType().value, self.t.token())) 
 
 		self.t.advance() # subroutine name
@@ -333,7 +322,6 @@ class CompilationEngine:
 		append_node(root, self.new_node(self.t.tokenType().value, self.t.token()))
 
 		self.t.advance() # type
-		#expect_assert(self._types, self.t.token())
 		append_node(root, self.new_node(self.t.tokenType().value, self.t.token()))
 
 		while True:
@@ -623,5 +611,5 @@ if __name__ == "__main__":
 		a = Analyzer(path)
 		a.gen()
 
-	#print(f"Wrote to {outpath}")
+	print(f"Wrote to {outpath}")
 
